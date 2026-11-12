@@ -1,0 +1,105 @@
+name: f1archive
+
+x-db-env: &db-env
+  DATABASE_URL: postgres://${POSTGRES_USER:-f1archive}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-f1archive}
+
+services:
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-f1archive}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-f1archive}
+    command: >
+      postgres
+        -c shared_buffers=${PG_SHARED_BUFFERS:-1GB}
+        -c effective_cache_size=${PG_EFFECTIVE_CACHE_SIZE:-4GB}
+        -c work_mem=32MB
+        -c maintenance_work_mem=${PG_MAINTENANCE_WORK_MEM:-1GB}
+        -c max_wal_size=8GB
+        -c checkpoint_timeout=15min
+        -c random_page_cost=1.1
+        -c jit=off
+    volumes:
+      - ${PGDATA_DIR:-pgdata}:/var/lib/postgresql/data
+    shm_size: 1g
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      target: api
+    restart: unless-stopped
+    environment:
+      <<: *db-env
+      PORT: "4000"
+      RADIO_DIR: /data/radio
+      EXPORT_DIR: /data/exports
+      RADIO_DOWNLOADS: ${RADIO_DOWNLOADS:-true}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-https://f1archive.org}
+      TRUST_PROXY: ${TRUST_PROXY:-true}
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-600}
+      EXPORT_MAX_ROWS: ${EXPORT_MAX_ROWS:-250000000}
+      CACHE_CLEAR_TOKEN: ${CACHE_CLEAR_TOKEN:-}
+      NOTICE_TOKEN: ${NOTICE_TOKEN:-}
+    volumes:
+      - ${RADIO_DIR_HOST:-./data/radio}:/data/radio:ro
+      - exports:/data/exports:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "node", "-e", "fetch('http://localhost:4000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  worker:
+    build:
+      context: .
+      target: worker
+    restart: unless-stopped
+    command: [ "serve" ]
+    environment:
+      <<: *db-env
+      SOURCE_DB: /data/source/${SOURCE_DB_FILE:-f1-telem.db}
+      RADIO_DIR: /data/radio
+      EXPORT_DIR: /data/exports
+      EXPORT_CONCURRENCY: ${EXPORT_CONCURRENCY:-1}
+      EXPORT_TTL_HOURS: ${EXPORT_TTL_HOURS:-48}
+      EXPORT_MAX_ROWS: ${EXPORT_MAX_ROWS:-250000000}
+      CACHE_CLEAR_TOKEN: ${CACHE_CLEAR_TOKEN:-}
+      WEB_INTERNAL_URL: http://web:3000
+    volumes:
+      - ${SOURCE_DB_DIR:-./data/dev}:/data/source:ro
+      - ${RADIO_DIR_HOST:-./data/radio}:/data/radio
+      - exports:/data/exports
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      target: web
+      args:
+        API_INTERNAL_URL: http://api:4000
+    restart: unless-stopped
+    environment:
+      API_INTERNAL_URL: http://api:4000
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-https://f1archive.org}
+      CACHE_CLEAR_TOKEN: ${CACHE_CLEAR_TOKEN:-}
+    ports:
+      - "${WEB_BIND:-0.0.0.0}:${WEB_PORT:-3000}:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  exports:

@@ -1,0 +1,21 @@
+export const config = {
+  port: Number(process.env.PORT ?? 4000),
+  host: process.env.HOST ?? '0.0.0.0',
+  radioDir: process.env.RADIO_DIR ?? '/data/radio',
+  exportDir: process.env.EXPORT_DIR ?? '/data/exports',
+  radioDownloads: (process.env.RADIO_DOWNLOADS ?? 'true') !== 'false',
+  publicBaseUrl: process.env.PUBLIC_BASE_URL ?? 'https://f1archive.org',
+  trustProxy: (process.env.TRUST_PROXY ?? 'true') !== 'false',
+  rateLimitPerMinute: Number(process.env.RATE_LIMIT_PER_MINUTE ?? 600),
+  statementTimeoutMs: Number(process.env.STATEMENT_TIMEOUT_MS ?? 15_000),
+  telemetry: {
+    maxWindowNs: Number(process.env.TELEMETRY_MAX_WINDOW_S ?? 900) * 1e9,
+    maxDrivers: 6,
+    maxSamples: 400_000,
+    positionsMaxWindowNs: 300 * 1e9,
+  },
+  maxActiveExportsPerClient: 3,
+  version: process.env.APP_VERSION ?? '0.1.0',
+  cacheClearToken: process.env.CACHE_CLEAR_TOKEN || null,
+  noticeToken: process.env.NOTICE_TOKEN || null,
+};

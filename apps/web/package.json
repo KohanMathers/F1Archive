@@ -1,0 +1,29 @@
+{
+  "name": "@f1archive/web",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@f1archive/shared": "workspace:*",
+    "@fontsource-variable/nunito-sans": "5.3.0",
+    "@fontsource-variable/open-sans": "5.3.0",
+    "@fontsource-variable/source-code-pro": "5.3.0",
+    "next": "15.5.29",
+    "react": "19.1.10",
+    "react-dom": "19.1.10",
+    "server-only": "0.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/react": "19.1.17",
+    "@types/react-dom": "19.1.11",
+    "typescript": "5.9.3"
+  }
+}

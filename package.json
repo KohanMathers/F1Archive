@@ -1,0 +1,19 @@
+{
+  "name": "f1archive",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "F1Archive, an independent, unofficial long-term archive of Formula 1 data.",
+  "packageManager": "pnpm@12.17.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "dev:api": "pnpm --filter @f1archive/api dev",
+    "dev:web": "pnpm --filter @f1archive/web dev",
+    "worker": "pnpm --filter @f1archive/worker start"
+  }
+}

@@ -1,0 +1,4 @@
+services:
+  postgres:
+    ports:
+      - "${POSTGRES_BIND:?set POSTGRES_BIND in .env to this machine's LAN address}:${POSTGRES_PORT:-5432}:5432"

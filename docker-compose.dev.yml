@@ -1,0 +1,7 @@
+services:
+  postgres:
+    ports:
+      - "127.0.0.1:${DEV_PG_PORT:-5433}:5432"
+  api:
+    ports:
+      - "127.0.0.1:4000:4000"

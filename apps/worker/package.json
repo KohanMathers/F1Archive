@@ -1,0 +1,35 @@
+{
+  "name": "@f1archive/worker",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "start": "node dist/cli.js",
+    "dev": "tsx src/cli.ts"
+  },
+  "dependencies": {
+    "@dsnp/parquetjs": "1.9.4",
+    "@f1archive/db": "workspace:*",
+    "@f1archive/shared": "workspace:*",
+    "archiver": "7.0.1",
+    "better-sqlite3": "12.11.1",
+    "pg": "8.23.1",
+    "pg-copy-streams": "7.0.0",
+    "pg-query-stream": "4.17.1"
+  },
+  "devDependencies": {
+    "@types/archiver": "6.0.4",
+    "@types/better-sqlite3": "7.6.13",
+    "@types/node": "22.20.5",
+    "@types/pg": "8.23.1",
+    "@types/pg-copy-streams": "1.2.5",
+    "tsup": "8.5.1",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
+  }
+}
